@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viaggio Agosto 2025 — Confronta 3 Itinerari</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --bg: #f0ede8;
+  --card: #ffffff;
+  --text: #1a1a2e;
+  --text-soft: #555;
+  --border: #e0dbd3;
+  --a-blue: #1a6b9a;
+  --a-light: #e8f4fb;
+  --b-green: #2d7a4f;
+  --b-light: #e8f5ed;
+  --c-orange: #e8682a;
+  --c-light: #fef0e8;
+  --d-purple: #7b3fa0;
+  --d-light: #f5eeff;
+  --gold: #f7c94a;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08);
+  --shadow-hover: 0 6px 28px rgba(0,0,0,0.14);
+  --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+
+/* ── HEADER ── */
+.site-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+  color: #fff;
+  padding: 40px 24px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.site-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.header-tag {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+  position: relative;
+}
+.site-header h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(22px, 5vw, 38px);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 10px;
+  position: relative;
+}
+.site-header h1 span { color: var(--gold); }
+.header-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 28px;
+  position: relative;
+}
+
+/* version cards in header */
+.version-cards {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+.vc {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+  min-width: 155px;
+  text-align: left;
+}
+.vc:hover, .vc.active { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.vc.active-a { background: rgba(26,107,154,0.35); border-color: var(--a-blue); }
+.vc.active-b { background: rgba(45,122,79,0.35); border-color: var(--b-green); }
+.vc.active-c { background: rgba(232,104,42,0.35); border-color: var(--c-orange); }
+.vc-badge {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.vc-badge.a { color: #5bb8f5; }
+.vc-badge.b { color: #6ed49a; }
+.vc-badge.c { color: #ffaa66; }
+.vc-badge.d { color: #c08af0; }
+.vc-name { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.vc-km { font-size: 12px; color: rgba(255,255,255,0.6); }
+.vc-cost { font-size: 13px; font-weight: 600; color: var(--gold); }
+
+/* ── MAIN NAV TABS ── */
+.main-nav {
+  background: var(--card);
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+.nav-tab {
+  padding: 16px 28px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.tab-a.active { color: var(--a-blue); border-bottom-color: var(--a-blue); }
+.nav-tab.tab-b.active { color: var(--b-green); border-bottom-color: var(--b-green); }
+.nav-tab.tab-c.active { color: var(--c-orange); border-bottom-color: var(--c-orange); }
+.nav-tab.tab-compare.active { color: var(--text); border-bottom-color: var(--gold); }
+.nav-tab.tab-d.active { color: var(--d-purple); border-bottom-color: var(--d-purple); }
+
+/* ── CONTENT SECTIONS ── */
+.section { display: none; padding: 32px 20px; max-width: 1100px; margin: 0 auto; }
+.section.active { display: block; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── VERSION INTRO BOX ── */
+.version-intro {
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.vi-a { background: var(--a-light); border-left: 4px solid var(--a-blue); }
+.vi-b { background: var(--b-light); border-left: 4px solid var(--b-green); }
+.vi-c { background: var(--c-light); border-left: 4px solid var(--c-orange); }
+.vi-d { background: var(--d-light); border-left: 4px solid var(--d-purple); }
+.vi-emoji { font-size: 42px; flex-shrink: 0; }
+.vi-text h2 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.vi-text p { font-size: 14px; color: var(--text-soft); line-height: 1.6; }
+.vi-stats { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+.vi-stat { background: rgba(255,255,255,0.7); border-radius: 8px; padding: 8px 14px; text-align: center; }
+.vi-stat .val { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; }
+.vi-stat .lbl { font-size: 11px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.5px; }
+.a-col { color: var(--a-blue); }
+.b-col { color: var(--b-green); }
+.c-col { color: var(--c-orange); }
+.d-col { color: var(--d-purple); }
+
+/* ── WARNING BOX ── */
+.warn-box {
+  background: #fff8e6;
+  border: 1px solid #f5c842;
+  border-left: 4px solid #e6a817;
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.warn-box strong { color: #b8740a; }
+
+/* ── MAP ── */
+.map-wrapper { border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 28px; }
+.map-container { width: 100%; height: 400px; background: #dce9f5; }
+.map-footer { padding:10px 16px; background:#fff; border-top:1px solid #e8e4df; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; border-radius: 0 0 var(--radius) var(--radius); }
+.leaflet-container { font-family: 'Inter',sans-serif !important; }
+
+/* ── TIMELINE ── */
+.timeline { position: relative; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 28px;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.day-card {
+  position: relative;
+  margin-bottom: 16px;
+  margin-left: 64px;
+}
+.day-dot {
+  position: absolute;
+  left: -50px;
+  top: 18px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  z-index: 2;
+  color: var(--text-soft);
+}
+.day-dot.dot-a { border-color: var(--a-blue); color: var(--a-blue); background: var(--a-light); }
+.day-dot.dot-b { border-color: var(--b-green); color: var(--b-green); background: var(--b-light); }
+.day-dot.dot-c { border-color: var(--c-orange); color: var(--c-orange); background: var(--c-light); }
+.day-dot.dot-d { border-color: var(--d-purple); color: var(--d-purple); background: var(--d-light); }
+
+.day-header {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s;
+  flex-wrap: wrap;
+}
+.day-header:hover { box-shadow: var(--shadow-hover); }
+.day-date { font-size: 12px; color: var(--text-soft); }
+.day-city { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 700; flex: 1; }
+.day-emoji { font-size: 22px; }
+.day-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.badge-transfer { background: #eef; color: #446; }
+.badge-relax { background: #e6f7f0; color: #1a7a4f; }
+.badge-culture { background: #f5eeff; color: #6a3db8; }
+.badge-night { background: #fff0e6; color: #b85a1a; }
+.badge-warning { background: #fff3cd; color: #856404; }
+.day-meta { font-size: 12px; color: var(--text-soft); }
+.chevron { margin-left: auto; font-size: 18px; transition: transform 0.25s; flex-shrink: 0; }
+.day-header.open .chevron { transform: rotate(180deg); }
+
+.day-body {
+  background: var(--card);
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 0 20px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s;
+  margin-top: -8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.day-body.open { max-height: 1200px; padding: 20px 20px 24px; }
+
+.day-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.day-slot { background: var(--bg); border-radius: 10px; padding: 12px 14px; }
+.day-slot .slot-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-soft); margin-bottom: 5px; }
+.day-slot p { font-size: 13px; line-height: 1.6; }
+
+/* sub-tabs for 3 days at main city */
+.sub-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.sub-tab {
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  background: transparent;
+  transition: all 0.2s;
+  color: var(--text-soft);
+}
+.sub-tab.active-a { background: var(--a-blue); border-color: var(--a-blue); color: #fff; }
+.sub-tab.active-b { background: var(--b-green); border-color: var(--b-green); color: #fff; }
+.sub-tab.active-c { background: var(--c-orange); border-color: var(--c-orange); color: #fff; }
+.sub-tab.active-d { background: var(--d-purple); border-color: var(--d-purple); color: #fff; }
+.sub-content { display: none; }
+.sub-content.active { display: block; animation: fadeUp 0.25s; }
+
+/* restaurant / tips pills */
+.tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 12px; }
+.tip-card { background: var(--bg); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+.tip-card .tip-label { font-weight: 700; margin-bottom: 4px; }
+.tip-card .tip-price { font-size: 11px; color: var(--text-soft); }
+
+/* ── COST TABLE ── */
+.cost-section { margin-top: 28px; }
+.cost-section h3 { font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 14px; }
+.cost-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.cost-table th { padding: 11px 14px; text-align: left; background: #f5f3f0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-soft); }
+.cost-table td { padding: 10px 14px; border-top: 1px solid var(--border); }
+.cost-table tr.subtotal td { background: #fafaf8; font-weight: 600; font-style: italic; }
+.cost-table tr.total td { background: var(--bg); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; }
+.flag { font-size: 15px; }
+
+.cost-summary {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.cs-item { flex: 1; min-width: 150px; }
+.cs-item .cs-val { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 800; }
+.cs-item .cs-lbl { font-size: 12px; color: var(--text-soft); }
+
+/* ── ACCORDION SECTION ── */
+.accordion { margin-top: 28px; }
+.acc-item { background: var(--card); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.acc-header {
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: background 0.2s;
+}
+.acc-header:hover { background: var(--bg); }
+.acc-chevron { margin-left: auto; font-size: 16px; transition: transform 0.25s; }
+.acc-header.open .acc-chevron { transform: rotate(180deg); }
+.acc-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; font-size: 14px; line-height: 1.7; color: var(--text-soft); }
+.acc-body.open { max-height: 600px; }
+.acc-inner { padding: 0 20px 20px; }
+.acc-inner ul { padding-left: 18px; }
+.acc-inner ul li { margin-bottom: 5px; }
+.acc-inner strong { color: var(--text); }
+
+/* ── COMPARE SECTION ── */
+.compare-table-wrap { overflow-x: auto; }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.compare-table th { padding: 12px 16px; text-align: left; background: #f5f3f0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-soft); }
+.compare-table td { padding: 12px 16px; border-top: 1px solid var(--border); vertical-align: top; }
+.compare-table tr.row-a td:first-child { border-left: 4px solid var(--a-blue); }
+.compare-table tr.row-b td:first-child { border-left: 4px solid var(--b-green); }
+.compare-table tr.row-c td:first-child { border-left: 4px solid var(--c-orange); }
+.compare-table tr.row-d td:first-child { border-left: 4px solid var(--d-purple); }
+.highlight-best { background: #f0fff6 !important; }
+.tag-best { font-size: 10px; font-weight: 700; background: #c8f7da; color: #1a6b3a; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
+.tag-worst { font-size: 10px; background: #fde8e8; color: #c0392b; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
+
+/* ── SECTION TITLES ── */
+.section-title { font-family: 'Poppins', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+
+/* ── FOOTER ── */
+footer { background: #1a1a2e; color: rgba(255,255,255,0.6); text-align: center; padding: 28px 20px; font-size: 13px; margin-top: 40px; }
+footer strong { color: var(--gold); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .timeline::before { left: 18px; }
+  .day-card { margin-left: 44px; }
+  .day-dot { left: -38px; width: 28px; height: 28px; font-size: 11px; }
+  .nav-tab { padding: 12px 14px; font-size: 12px; }
+  .version-cards { flex-direction: column; align-items: center; }
+  .vc { min-width: 260px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════ HEADER -->
+<header class="site-header">
+  <div class="header-tag">🚐 Pianificatore Viaggio</div>
+  <h1>Reggio Emilia — <span>Mediterraneo</span><br>e ritorno</h1>
+  <p class="header-sub">4–11 Agosto 2025 &nbsp;·&nbsp; 6 persone &nbsp;·&nbsp; 8 giorni &nbsp;·&nbsp; 3 itinerari a confronto</p>
+  <div class="version-cards">
+    <div class="vc" onclick="switchTab('a')" id="vc-a">
+      <div class="vc-badge a">🔵 VERSIONE A</div>
+      <div class="vc-name">Barcellona</div>
+      <div class="vc-km">~2.380 km totali</div>
+      <div class="vc-cost">~€340 carburante + pedaggi</div>
+    </div>
+    <div class="vc" onclick="switchTab('b')" id="vc-b">
+      <div class="vc-badge b">🌿 VERSIONE B</div>
+      <div class="vc-name">Sète &amp; Camargue</div>
+      <div class="vc-km">~1.950 km totali</div>
+      <div class="vc-cost">~€270 carburante + pedaggi</div>
+    </div>
+    <div class="vc" onclick="switchTab('c')" id="vc-c">
+      <div class="vc-badge c">🌊 VERSIONE C</div>
+      <div class="vc-name">Valencia</div>
+      <div class="vc-km">~2.620 km totali</div>
+      <div class="vc-cost">~€380 carburante + pedaggi</div>
+    </div>
+    <div class="vc" onclick="switchTab('d')" id="vc-d">
+      <div class="vc-badge d">🎸 VERSIONE D</div>
+      <div class="vc-name">San Sebastián + Bilbao</div>
+      <div class="vc-km">~2.520 km totali</div>
+      <div class="vc-cost">~€370 carburante + pedaggi</div>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════ STICKY NAV -->
+<nav class="main-nav">
+  <div class="nav-tab tab-a active" onclick="switchTab('a')" id="nav-a">🔵 Barcellona</div>
+  <div class="nav-tab tab-b" onclick="switchTab('b')" id="nav-b">🌿 Sète</div>
+  <div class="nav-tab tab-c" onclick="switchTab('c')" id="nav-c">🌊 Valencia</div>
+  <div class="nav-tab tab-d" onclick="switchTab('d')" id="nav-d">🎸 San Sebastián</div>
+  <div class="nav-tab tab-compare" onclick="switchTab('compare')" id="nav-compare">⚖️ Confronto</div>
+</nav>
+
+<!-- ════════════════════════════════════════════════ SECTION A: BARCELLONA -->
+<div class="section active" id="section-a">
+
+  <div class="version-intro vi-a">
+    <div class="vi-emoji">🔵</div>
+    <div class="vi-text" style="flex:1">
+      <h2 class="a-col">Versione Barcellona</h2>
+      <p>Il classico grande itinerario. Barcellona offre tre giorni intensi tra architettura modernista, spiagge urbane e vita notturna leggendaria. La tratta più lunga è Nîmes → Barcellona (~290 km, ~3h) che rimane sotto i 4 ore.</p>
+      <div class="vi-stats">
+        <div class="vi-stat"><div class="val a-col">2.380</div><div class="lbl">km totali</div></div>
+        <div class="vi-stat"><div class="val a-col">~24h</div><div class="lbl">guida tot.</div></div>
+        <div class="vi-stat"><div class="val a-col">€195</div><div class="lbl">carburante est.</div></div>
+        <div class="vi-stat"><div class="val a-col">€145</div><div class="lbl">pedaggi est.</div></div>
+        <div class="vi-stat"><div class="val a-col">€57</div><div class="lbl">quota/persona</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-wrapper">
+    <div id="map-a" class="map-container"></div>
+  </div>
+
+  <h2 class="section-title">📅 Itinerario giorno per giorno</h2>
+  <div class="timeline" id="timeline-a"></div>
+
+  <div class="cost-section">
+    <h3>💰 Riepilogo costi</h3>
+    <table class="cost-table">
+      <thead><tr><th>Tratta</th><th>Paese</th><th>Km</th><th>Carburante</th><th>Pedaggi</th><th>Totale</th></tr></thead>
+      <tbody>
+        <tr><td>Reggio Emilia → Nizza</td><td><span class="flag">🇮🇹</span>+<span class="flag">🇫🇷</span></td><td>350</td><td>~€46</td><td>~€38</td><td>~€84</td></tr>
+        <tr><td>Nizza → Nîmes</td><td><span class="flag">🇫🇷</span></td><td>260</td><td>~€34</td><td>~€22</td><td>~€56</td></tr>
+        <tr><td>Nîmes → Barcellona</td><td><span class="flag">🇫🇷</span>+<span class="flag">🇪🇸</span></td><td>290</td><td>~€37</td><td>~€30</td><td>~€67</td></tr>
+        <tr><td>Barcellona → Marsiglia</td><td><span class="flag">🇪🇸</span>+<span class="flag">🇫🇷</span></td><td>480</td><td>~€62</td><td>~€42</td><td>~€104</td></tr>
+        <tr><td>Marsiglia → Reggio Emilia</td><td><span class="flag">🇫🇷</span>+<span class="flag">🇮🇹</span></td><td>640</td><td>~€84</td><td>~€58</td><td>~€142</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Italia 🇮🇹</td><td>~€65</td><td>~€52</td><td>~€117</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Francia 🇫🇷</td><td>~€105</td><td>~€85</td><td>~€190</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Spagna 🇪🇸</td><td>~€93</td><td>~€58</td><td>~€151</td></tr>
+        <tr class="total"><td colspan="3">TOTALE VIAGGIO</td><td>~€263</td><td>~€195</td><td><strong>~€458</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="cost-summary">
+      <div class="cs-item"><div class="cs-val a-col">~€458</div><div class="cs-lbl">Totale carburante + pedaggi</div></div>
+      <div class="cs-item"><div class="cs-val a-col">~€1.050</div><div class="cs-lbl">Alloggio 7 notti (media €150/n)</div></div>
+      <div class="cs-item"><div class="cs-val a-col">~€1.508</div><div class="cs-lbl">Totale stimato (escluso cibo)</div></div>
+      <div class="cs-item"><div class="cs-val a-col">~€251</div><div class="cs-lbl">Quota per persona (÷6)</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-soft);margin-top:10px">⚠️ Stime indicative. Verifica pedaggi su <a href="https://www.viamichelin.it" target="_blank">ViaMichelin</a> e <a href="https://www.autopistas.com" target="_blank">Autopistas.es</a></p>
+  </div>
+
+  <div class="accordion" id="acc-a">
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🚗</span> Parcheggio pulmino a Barcellona <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Parking Plaça Espanya (Saba):</strong> ottima base vicino al Paral·lel. ~€20-25/giorno, accesso comodo per L'Eixample e il Poble Sec.</li>
+          <li><strong>Parking Glòries (BSM):</strong> vicino al Poblenou e al mare, tariffa giornaliera ~€18-22. Comodo per la spiaggia.</li>
+          <li><strong>ZTL Barcellona (ZBE):</strong> il centro storico (Gòtic, Born) ha restrizioni per veicoli Euro 4 e inferiori. Con Euro 5/6 puoi entrare, ma evita il Barri Gòtic in auto — parcheggia fuori e vai a piedi o in metro.</li>
+          <li><strong>Consiglio:</strong> lascia il pulmino per tutta la permanenza nello stesso parcheggio, Barcellona ha ottima metro e bus. Risparmia stress e soldi.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🍽️</span> Dove mangiare autentico a Barcellona <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Bar del Pla (El Born):</strong> tapas catalane ottime, non turistico nonostante la zona. €€. Prova il <em>pa amb tomàquet</em> con pernil.</li>
+          <li><strong>La Pepita (Gràcia):</strong> bocadillos creativi, code brevi, prezzi giusti. € — perfetto per pranzo veloce.</li>
+          <li><strong>Bodega Sepúlveda (Eixample Esquerra):</strong> trattoria catalana storica, menu del giorno €12-14. Lontano dai turisti.</li>
+          <li><strong>Mercat de l'Abaceria (Gràcia):</strong> mercato meno turistico della Boqueria, ottimi prodotti locali.</li>
+          <li><strong>Evita:</strong> qualsiasi posto con foto plastificate del menu sulla Rambla.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🌙</span> Vita notturna a Barcellona <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Barceloneta Beach Bars:</strong> aperitivi al tramonto sulla spiaggia, atmosfera rilassata, prezzi ok se eviti i bar sulla prima fila.</li>
+          <li><strong>El Born / Sant Pere:</strong> cocktail bar, musica dal vivo, orario serale. Meno chiassoso di Barceloneta.</li>
+          <li><strong>Gràcia di sera:</strong> Plaza del Sol e Plaza de la Vila de Gràcia si animano con tavolini all'aperto, atmosfera locale autentica.</li>
+          <li><strong>Nota agosto:</strong> Barcellona è molto affollata. Prenota i ristoranti con 1-2 giorni di anticipo, specialmente nel weekend.</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════ SECTION B: SÈTE -->
+<div class="section" id="section-b">
+
+  <div class="version-intro vi-b">
+    <div class="vi-emoji">🌿</div>
+    <div class="vi-text" style="flex:1">
+      <h2 class="b-col">Versione Sète + Camargue — "La Venezia Francese"</h2>
+      <p><strong>Perché Sète:</strong> è a soli 45 min da Nîmes, ha un porto peschereccio autentico, spiagge selvagge, ottimo pesce fresco e un'identità unica (patrimonio Brassens). La Camargue è a 30 km: cavalli bianchi, fenicotteri, saline. Tre giorni sono perfetti — senza i 290 km di Barcellona. Alternative valutate e scartate: <em>Montpellier</em> (poca spiaggia, università chiuse in agosto, meno carattere) e <em>Perpignan</em> (interessante ma meno ricca di esperienze per 3 giorni completi).</p>
+      <div class="vi-stats">
+        <div class="vi-stat"><div class="val b-col">1.950</div><div class="lbl">km totali</div></div>
+        <div class="vi-stat"><div class="val b-col">~19h</div><div class="lbl">guida tot.</div></div>
+        <div class="vi-stat"><div class="val b-col">€160</div><div class="lbl">carburante est.</div></div>
+        <div class="vi-stat"><div class="val b-col">€110</div><div class="lbl">pedaggi est.</div></div>
+        <div class="vi-stat"><div class="val b-col">€45</div><div class="lbl">quota/persona</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-wrapper">
+    <div id="map-b" class="map-container"></div>
+  </div>
+
+  <h2 class="section-title">📅 Itinerario giorno per giorno</h2>
+  <div class="timeline" id="timeline-b"></div>
+
+  <div class="cost-section">
+    <h3>💰 Riepilogo costi</h3>
+    <table class="cost-table">
+      <thead><tr><th>Tratta</th><th>Paese</th><th>Km</th><th>Carburante</th><th>Pedaggi</th><th>Totale</th></tr></thead>
+      <tbody>
+        <tr><td>Reggio Emilia → Nizza</td><td><span class="flag">🇮🇹</span>+<span class="flag">🇫🇷</span></td><td>350</td><td>~€46</td><td>~€38</td><td>~€84</td></tr>
+        <tr><td>Nizza → Nîmes</td><td><span class="flag">🇫🇷</span></td><td>260</td><td>~€34</td><td>~€22</td><td>~€56</td></tr>
+        <tr><td>Nîmes → Sète</td><td><span class="flag">🇫🇷</span></td><td>55</td><td>~€7</td><td>~€4</td><td>~€11</td></tr>
+        <tr><td>Sète → Marsiglia</td><td><span class="flag">🇫🇷</span></td><td>175</td><td>~€23</td><td>~€15</td><td>~€38</td></tr>
+        <tr><td>Marsiglia → Reggio Emilia</td><td><span class="flag">🇫🇷</span>+<span class="flag">🇮🇹</span></td><td>640</td><td>~€84</td><td>~€58</td><td>~€142</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Italia 🇮🇹</td><td>~€38</td><td>~€32</td><td>~€70</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Francia 🇫🇷</td><td>~€156</td><td>~€105</td><td>~€261</td></tr>
+        <tr class="total"><td colspan="3">TOTALE VIAGGIO</td><td>~€194</td><td>~€137</td><td><strong>~€331</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="cost-summary">
+      <div class="cs-item"><div class="cs-val b-col">~€331</div><div class="cs-lbl">Totale carburante + pedaggi</div></div>
+      <div class="cs-item"><div class="cs-val b-col">~€1.050</div><div class="cs-lbl">Alloggio 7 notti (media €150/n)</div></div>
+      <div class="cs-item"><div class="cs-val b-col">~€1.381</div><div class="cs-lbl">Totale stimato (escluso cibo)</div></div>
+      <div class="cs-item"><div class="cs-val b-col">~€230</div><div class="cs-lbl">Quota per persona (÷6)</div></div>
+    </div>
+    <div style="background:#e8f5ed;border-radius:10px;padding:14px 18px;margin-top:12px;font-size:13px;">
+      💚 <strong>Risparmio vs Barcellona:</strong> ~430 km in meno, ~€127 in meno su carburante+pedaggi, ~€21/persona di risparmio.
+    </div>
+    <p style="font-size:12px;color:var(--text-soft);margin-top:10px">⚠️ Stime indicative. Verifica pedaggi su <a href="https://www.viamichelin.it" target="_blank">ViaMichelin</a></p>
+  </div>
+
+  <div class="accordion" id="acc-b">
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🚗</span> Parcheggio pulmino a Sète <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Parking Pointe Courte:</strong> vicino al quartiere dei pescatori, tariffa giornaliera ~€8-12. Ideale come base.</li>
+          <li><strong>Parking del Théâtre de la Mer:</strong> centro città, ~€10/giorno. A piedi da tutto il porto.</li>
+          <li><strong>Centro storico:</strong> Sète non ha ZTL stretta ma il centro è compatto. Meglio parcheggiare in periferia e camminare — è piccola.</li>
+          <li><strong>Per la Camargue:</strong> il pulmino è ideale, strade ampie, nessun problema di accesso.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🐟</span> Dove mangiare pesce autentico a Sète <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>La Pointe Courte:</strong> quartiere dei pescatori. Ristoranti di famiglia, pesce del giorno. €€. Prova la <em>tielle sétoise</em> (torta al polpo speziato — specialità locale).</li>
+          <li><strong>Quai Maximin Licciardi:</strong> lungocanale con ristoranti affacciati sull'acqua. Moules-frites eccellenti. €€.</li>
+          <li><strong>Marché des Halles (mercato coperto):</strong> comprare pesce fresco e cucinarlo in Airbnb — esperienza autentica e economica. € — aperto la mattina.</li>
+          <li><strong>Brasucade di cozze:</strong> piatto tipico locale, spesso servito all'aperto nei beach restaurant sulla Corniche.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🦩</span> Camargue: cosa fare e quando <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Parc Ornithologique de Pont de Gau:</strong> fenicotteri garantiti, ingresso a pagamento (verifica sito ufficiale). Meglio la mattina presto.</li>
+          <li><strong>Saintes-Maries-de-la-Mer:</strong> villaggio, spiagge selvagge, cavalli Camargue. Parcheggio fuori dal paese.</li>
+          <li><strong>Aigues-Mortes:</strong> città medievale murata, visita in ~2h. Bella al tramonto.</li>
+          <li><strong>Agosto attenzione:</strong> zanzare la sera nelle zone paludose — porta repellente. Temperature alte fino alle 14, spiaggia al mare il pomeriggio.</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════ SECTION C: VALENCIA -->
+<div class="section" id="section-c">
+
+  <div class="warn-box">
+    <strong>⚠️ Tratta critica: Nîmes → Valencia (~550 km)</strong><br>
+    Tempo teorico di guida: ~5h senza soste via A9 → AP-7. <strong>Sosta obbligatoria a Perpignan</strong> (~2h da Nîmes): arrivo ~10:30, pausa pranzo 45 min, ripartenza ~11:15, arrivo Valencia ~14:30-15:00 (con traffico agosto). La tratta è fattibile ma impegnativa — pianifica partenza da Nîmes non oltre le 8:30.
+  </div>
+
+  <div class="version-intro vi-c">
+    <div class="vi-emoji">🌊</div>
+    <div class="vi-text" style="flex:1">
+      <h2 class="c-col">Versione Valencia — La paella originale</h2>
+      <p>Valencia è la meta più ricca: spiagge, architettura futuristica, gastronomia autentica (la paella è nata qui). Il prezzo è la tratta Nîmes→Valencia, la più lunga del viaggio. Con la sosta a Perpignan rimane gestibile. Carburante più economico in Spagna (1,55€/L).</p>
+      <div class="vi-stats">
+        <div class="vi-stat"><div class="val c-col">2.620</div><div class="lbl">km totali</div></div>
+        <div class="vi-stat"><div class="val c-col">~27h</div><div class="lbl">guida tot.</div></div>
+        <div class="vi-stat"><div class="val c-col">~€215</div><div class="lbl">carburante est.</div></div>
+        <div class="vi-stat"><div class="val c-col">~€165</div><div class="lbl">pedaggi est.</div></div>
+        <div class="vi-stat"><div class="val c-col">€63</div><div class="lbl">quota/persona</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-wrapper">
+    <div id="map-c" class="map-container"></div>
+  </div>
+
+  <h2 class="section-title">📅 Itinerario giorno per giorno</h2>
+  <div class="timeline" id="timeline-c"></div>
+
+  <div class="cost-section">
+    <h3>💰 Riepilogo costi</h3>
+    <table class="cost-table">
+      <thead><tr><th>Tratta</th><th>Paese</th><th>Km</th><th>Carburante</th><th>Pedaggi</th><th>Totale</th></tr></thead>
+      <tbody>
+        <tr><td>Reggio Emilia → Nizza</td><td><span class="flag">🇮🇹</span>+<span class="flag">🇫🇷</span></td><td>350</td><td>~€46</td><td>~€38</td><td>~€84</td></tr>
+        <tr><td>Nizza → Nîmes</td><td><span class="flag">🇫🇷</span></td><td>260</td><td>~€34</td><td>~€22</td><td>~€56</td></tr>
+        <tr><td>Nîmes → Valencia (con sosta Perpignan)</td><td><span class="flag">🇫🇷</span>+<span class="flag">🇪🇸</span></td><td>550</td><td>~€70</td><td>~€55</td><td>~€125</td></tr>
+        <tr><td>Valencia → Marsiglia</td><td><span class="flag">🇪🇸</span>+<span class="flag">🇫🇷</span></td><td>650</td><td>~€83</td><td>~€65</td><td>~€148</td></tr>
+        <tr><td>Marsiglia → Reggio Emilia</td><td><span class="flag">🇫🇷</span>+<span class="flag">🇮🇹</span></td><td>640</td><td>~€84</td><td>~€58</td><td>~€142</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Italia 🇮🇹</td><td>~€38</td><td>~€32</td><td>~€70</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Francia 🇫🇷</td><td>~€120</td><td>~€98</td><td>~€218</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Spagna 🇪🇸 (1,55€/L)</td><td>~€95</td><td>~€73</td><td>~€168</td></tr>
+        <tr class="total"><td colspan="3">TOTALE VIAGGIO</td><td>~€253</td><td>~€203</td><td><strong>~€456</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="cost-summary">
+      <div class="cs-item"><div class="cs-val c-col">~€456</div><div class="cs-lbl">Totale carburante + pedaggi</div></div>
+      <div class="cs-item"><div class="cs-val c-col">~€1.050</div><div class="cs-lbl">Alloggio 7 notti (media €150/n)</div></div>
+      <div class="cs-item"><div class="cs-val c-col">~€1.506</div><div class="cs-lbl">Totale stimato (escluso cibo)</div></div>
+      <div class="cs-item"><div class="cs-val c-col">~€251</div><div class="cs-lbl">Quota per persona (÷6)</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-soft);margin-top:10px">⚠️ Pedaggi AP-7 Spagna: stima ~€40-55 — verifica su <a href="https://www.autopistas.com" target="_blank">Autopistas.es</a> e <a href="https://www.viamichelin.it" target="_blank">ViaMichelin</a></p>
+  </div>
+
+  <div class="accordion" id="acc-c">
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🍛</span> Dove mangiare la paella autentica <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Quartiere La Malvarrosa / Cabanyal:</strong> i ristoranti sul lungomare vicino al porto storico. Evita la zona attorno alla Ciudad de las Artes (troppo turistica). Il Cabanyal è il posto giusto.</li>
+          <li><strong>La Pepica (Passeig Neptú):</strong> storica, frequentata anche da Hemingway. Paella valenciana originale (pollo + coniglio + fagioli, NO frutti di mare). €€€ — prenota.</li>
+          <li><strong>Bar Restaurante Navarro (Ruzafa):</strong> paella autentica, frequentato dai locali, nessun turista. €€.</li>
+          <li><strong>Regola d'oro:</strong> la paella valenciana originale NON ha frutti di mare. Ha pollo, coniglio, ferradura (fagioli piatti) e garrofó. Diffida dei posti che ti offrono "paella mista" come prima scelta.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🚗</span> Parcheggio pulmino a Valencia <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>ZTL Valencia:</strong> il centro storico (Barrio del Carmen, Catedral) ha zone a traffico limitato. Con pulmino 6-7 posti NON entrare nel nucleo antico.</li>
+          <li><strong>Parking Colón (centro):</strong> vicino all'Eixample valenciano, ~€18-22/giorno. Metro a 5 min.</li>
+          <li><strong>Parking Ayuntamiento:</strong> centrale, ~€15-20/giorno. Accesso facile da pulmino.</li>
+          <li><strong>Zona Malvarrosa (spiaggia):</strong> parcheggio gratuito o a basso costo nelle vie laterali, utile per le giornate al mare.</li>
+          <li><strong>Airbnb consigliato:</strong> zona Ruzafa (vivace, autentica, servita da metro) o Malvarrosa (vicino spiaggia, più calma). Evita il centro storico strettissimo per accesso pulmino.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🌙</span> Vita notturna: Barrio del Carmen e Ruzafa <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Barrio del Carmen:</strong> il quartiere più vivace, medievale, pieno di bar e locali. Ideale dalle 22:00. Atmosfera autentica valenciana.</li>
+          <li><strong>Ruzafa:</strong> il quartiere "hipster" di Valencia, cocktail bar, wine bar, musica live. Più tranquillo del Carmen, ottimo per aperitivo serale.</li>
+          <li><strong>Horchatería El Collado (centro):</strong> prova l'horchata con fartons — tipico valenciano, ottimo a tarda serata.</li>
+          <li><strong>Agosto:</strong> Valencia è meno affollata di Barcellona in agosto (molti locali chiudono per ferie). Verifica sempre prima se il locale è aperto.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🏖️</span> Spiagge: Malvarrosa vs El Saler <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Playa de la Malvarrosa:</strong> sabbia fine, servizi completi, facilmente raggiungibile in pulmino. Più frequentata dai valenciani. Ottima per una giornata con gruppo.</li>
+          <li><strong>El Saler (Parco Naturale Albufera):</strong> 12 km a sud, sabbia più selvaggia, meno affollata, mare cristallino. Il pulmino arriva senza problemi. Consigliata per almeno una mezza giornata.</li>
+          <li><strong>L'Albufera:</strong> lago naturale a 10 min da El Saler. Giro in barca al tramonto (a pagamento — verifica sito ufficiale). Il paesaggio è quello delle risaie dove nasce il riso per la paella.</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════ SECTION D: SAN SEBASTIAN -->
+<div class="section" id="section-d">
+
+  <div class="warn-box">
+    <strong>⚠️ Tratta critica: Nîmes → San Sebastián (~680 km)</strong><br>
+    Tempo di guida: ~6h30 via A9 → A63 → autostrada dei Pirenei (Irun/confine basco). Percorso diretto senza tappe intermedie. <strong>Partenza da Nîmes entro le 7:30</strong> — arrivo San Sebastián ~14:30-15:00 con traffico agosto.
+  </div>
+
+  <div class="version-intro vi-d">
+    <div class="vi-emoji">🎸</div>
+    <div class="vi-text" style="flex:1">
+      <h2 class="d-col">Versione San Sebastián + Bilbao</h2>
+      <p>La meta più originale e gastronomicamente ricca. San Sebastián ha la concentrazione di stelle Michelin più alta al mondo pro capite, i pintxos della Parte Vieja sono una religione, le spiagge atlantiche sono bellissime. Giorno 2: gita in giornata a Bilbao per il Guggenheim. Tratte impegnative — ma ne vale la pena.</p>
+      <div class="vi-stats">
+        <div class="vi-stat"><div class="val d-col">2.520</div><div class="lbl">km totali</div></div>
+        <div class="vi-stat"><div class="val d-col">~26h</div><div class="lbl">guida tot.</div></div>
+        <div class="vi-stat"><div class="val d-col">~€210</div><div class="lbl">carburante est.</div></div>
+        <div class="vi-stat"><div class="val d-col">~€160</div><div class="lbl">pedaggi est.</div></div>
+        <div class="vi-stat"><div class="val d-col">€62</div><div class="lbl">quota/persona</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-wrapper">
+    <div id="map-d" class="map-container"></div>
+  </div>
+
+  <h2 class="section-title">📅 Itinerario giorno per giorno</h2>
+  <div class="timeline" id="timeline-d"></div>
+
+  <div class="cost-section">
+    <h3>💰 Riepilogo costi</h3>
+    <table class="cost-table">
+      <thead><tr><th>Tratta</th><th>Paese</th><th>Km</th><th>Carburante</th><th>Pedaggi</th><th>Totale</th></tr></thead>
+      <tbody>
+        <tr><td>Reggio Emilia → Nizza</td><td><span class="flag">🇮🇹</span>+<span class="flag">🇫🇷</span></td><td>350</td><td>~€46</td><td>~€38</td><td>~€84</td></tr>
+        <tr><td>Nizza → Nîmes</td><td><span class="flag">🇫🇷</span></td><td>260</td><td>~€34</td><td>~€22</td><td>~€56</td></tr>
+        <tr><td>Nîmes → San Sebastián (via A9 → A63 → Irun)</td><td><span class="flag">🇫🇷</span>+<span class="flag">🇪🇸</span></td><td>680</td><td>~€87</td><td>~€62</td><td>~€149</td></tr>
+        <tr><td>Gita Bilbao A/R (da San Sebastián)</td><td><span class="flag">🇪🇸</span></td><td>100</td><td>~€13</td><td>~€8</td><td>~€21</td></tr>
+        <tr><td>San Sebastián → Marsiglia</td><td><span class="flag">🇪🇸</span>+<span class="flag">🇫🇷</span></td><td>700</td><td>~€91</td><td>~€65</td><td>~€156</td></tr>
+        <tr><td>Marsiglia → Reggio Emilia</td><td><span class="flag">🇫🇷</span>+<span class="flag">🇮🇹</span></td><td>640</td><td>~€84</td><td>~€58</td><td>~€142</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Italia 🇮🇹</td><td>~€38</td><td>~€32</td><td>~€70</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Francia 🇫🇷</td><td>~€120</td><td>~€95</td><td>~€215</td></tr>
+        <tr class="subtotal"><td colspan="3">Subtotale Spagna 🇪🇸 (1,55€/L)</td><td>~€155</td><td>~€98</td><td>~€253</td></tr>
+        <tr class="total"><td colspan="3">TOTALE VIAGGIO</td><td>~€313</td><td>~€225</td><td><strong>~€538</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="cost-summary">
+      <div class="cs-item"><div class="cs-val d-col">~€538</div><div class="cs-lbl">Totale carburante + pedaggi</div></div>
+      <div class="cs-item"><div class="cs-val d-col">~€1.050</div><div class="cs-lbl">Alloggio 7 notti (media €150/n)</div></div>
+      <div class="cs-item"><div class="cs-val d-col">~€1.588</div><div class="cs-lbl">Totale stimato (escluso cibo)</div></div>
+      <div class="cs-item"><div class="cs-val d-col">~€265</div><div class="cs-lbl">Quota per persona (÷6)</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-soft);margin-top:10px">⚠️ Stima. Verifica pedaggi AP-7/AP-8 su <a href="https://www.autopistas.com" target="_blank">Autopistas.es</a> e <a href="https://www.viamichelin.it" target="_blank">ViaMichelin</a></p>
+  </div>
+
+  <div class="accordion">
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🦀</span> Pintxos autentici — dove mangiare nella Parte Vieja <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Come funziona:</strong> si gira di bar in bar, si prende dal bancone, si mangia in piedi, si paga a fine giro. Ogni pintxo ~€2-3. Bevi txakoli (vino bianco frizzante locale, versato dall'alto).</li>
+          <li><strong>Bar Txepetxa (Calle Pescadería):</strong> specialità anchoas (acciughe su pintxos creativi). Autentico, frequentato dai locali. €€.</li>
+          <li><strong>Bar Nestor (Calle Pescadería):</strong> leggendario per la tortilla. Arriva 30 min prima dell'apertura — finiscono in fretta. €€.</li>
+          <li><strong>Bar Tamboril (Plaza de la Constitución):</strong> ottimo gambas e gambas al ajillo. Molto locale. €€.</li>
+          <li><strong>Mercado de la Bretxa:</strong> prodotti locali, txistorra (salsiccia basca), conserve di mare. Ottimo per rifornire l'Airbnb. €.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🎨</span> Bilbao: guida pratica alla gita in giornata <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Guggenheim Bilbao:</strong> ingresso a pagamento — prenota online (verifica prezzi sito ufficiale). La struttura in titanio di Frank Gehry è spettacolare anche solo dall'esterno e gratis. Interno: 2-3 ore.</li>
+          <li><strong>Casco Viejo:</strong> Las Siete Calles, pintxos leggermente più economici che a SS. Mercado de la Ribera (il più grande mercato coperto d'Europa).</li>
+          <li><strong>Parcheggio:</strong> Parking Abandoibarra o Guggenheim ~€2-3/h. Non portare il pulmino nel Casco Viejo.</li>
+          <li><strong>Timing ottimale:</strong> partenza SS ore 9:00 → Bilbao ~9:45 → Guggenheim 10:00-13:00 → pranzo Casco Viejo → rientro SS ~17:00.</li>
+        </ul>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)"><span>🏖️</span> Spiagge e parcheggio pulmino a San Sebastián <span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul>
+          <li><strong>Playa de La Concha:</strong> la più bella, baia protetta, sabbia fine. Parking Urgull ~€15/g o Parking Gros ~€14/g, poi a piedi 10 min.</li>
+          <li><strong>Playa de Zurriola (Gros):</strong> più frequentata dai locali e surfisti, meno turistica. Ottima atmosfera.</li>
+          <li><strong>ZTL Parte Vieja:</strong> non entrare con il pulmino. Parking Buen Pastor (centro) ~€18-22/g oppure Parking Gros ~€14-18/g.</li>
+          <li><strong>Airbnb consigliato:</strong> zona Gros (più economica, giovane, spiaggia Zurriola a piedi) o Parte Vieja (nel cuore dei pintxos, più rumorosa di notte).</li>
+          <li><strong>Mare cantabrico in agosto:</strong> ~20°C, più fresco del Mediterraneo. Perfetto se volete scappare dal caldo.</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════ SECTION COMPARE -->
+<div class="section" id="section-compare">
+  <h2 class="section-title">⚖️ Confronto tra i 4 itinerari</h2>
+
+  <div class="compare-table-wrap">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Versione</th>
+          <th>Meta centrale</th>
+          <th>Km totali</th>
+          <th>Carburante + pedaggi</th>
+          <th>Quota/persona (trasporti)</th>
+          <th>Tratta più lunga</th>
+          <th>Punti di forza</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-a">
+          <td><strong>🔵 A — Barcellona</strong></td>
+          <td>Barcellona, Spagna</td>
+          <td>~2.380 km</td>
+          <td>~€458</td>
+          <td>~€76</td>
+          <td>Barcellona→Marsiglia (~4h) <span class="tag-worst">massima</span></td>
+          <td>Città iconiche, architettura, spiagge urbane, vita notturna top</td>
+        </tr>
+        <tr class="row-b highlight-best">
+          <td><strong>🌿 B — Sète</strong></td>
+          <td>Sète + Camargue, Francia</td>
+          <td>~1.950 km <span class="tag-best">✓ minimo</span></td>
+          <td>~€331 <span class="tag-best">✓ più economico</span></td>
+          <td>~€55 <span class="tag-best">✓ più basso</span></td>
+          <td>RE → Nizza (~3,5h)</td>
+          <td>Autentico, natura, pesce fresco, zero stress guida, Camargue unica</td>
+        </tr>
+        <tr class="row-c">
+          <td><strong>🌊 C — Valencia</strong></td>
+          <td>Valencia, Spagna</td>
+          <td>~2.620 km <span class="tag-worst">massimo</span></td>
+          <td>~€456</td>
+          <td>~€76</td>
+          <td>Nîmes→Valencia (~5h con sosta) <span class="tag-worst">critica</span></td>
+          <td>Paella originale, architettura unica, mare selvaggio, Albufera</td>
+        </tr>
+        <tr class="row-d">
+          <td><strong>🎸 D — San Sebastián</strong></td>
+          <td>San Sebastián + Bilbao, Spagna</td>
+          <td>~2.520 km</td>
+          <td>~€538 <span class="tag-worst">✗ massimo</span></td>
+          <td>~€90</td>
+          <td>Nîmes→SS (~6h30) e SS→Marsiglia (~6h30) <span class="tag-worst">entrambe critiche</span></td>
+          <td>Pintxos leggendari, Guggenheim, spiagge atlantiche, meta esclusiva</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:24px;">
+    <div style="background:var(--a-light);border-radius:var(--radius);padding:20px;border-left:4px solid var(--a-blue)">
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:8px;color:var(--a-blue)">🔵 Scegli Barcellona se…</div>
+      <p style="font-size:13px;line-height:1.6;color:var(--text-soft)">È il vostro primo viaggio insieme e volete una meta che sia "sicura", iconicamente bella, con metropolitana efficiente e attrazioni per tutti i gusti. Il nome Barcellona non delude mai.</p>
+    </div>
+    <div style="background:var(--b-light);border-radius:var(--radius);padding:20px;border-left:4px solid var(--b-green)">
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:8px;color:var(--b-green)">🌿 Scegli Sète se…</div>
+      <p style="font-size:13px;line-height:1.6;color:var(--text-soft)">Preferite autenticità alla fama, volete risparmiare ~€130 sui trasporti, amate la natura (Camargue è unica in Europa) e il pesce fresco. Meno chilometri = più energia per godersi ogni tappa.</p>
+    </div>
+    <div style="background:var(--c-light);border-radius:var(--radius);padding:20px;border-left:4px solid var(--c-orange)">
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:8px;color:var(--c-orange)">🌊 Scegli Valencia se…</div>
+      <p style="font-size:13px;line-height:1.6;color:var(--text-soft)">La paella originale è un sogno del gruppo, amate le architetture futuristiche (Calatrava), volete mare + città in modo diverso da Barcellona. Accettate la tratta lunga come parte dell'avventura.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px;">
+    <div style="background:var(--d-light);border-radius:var(--radius);padding:20px;border-left:4px solid var(--d-purple)">
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:8px;color:var(--d-purple)">🎸 Scegli San Sebastián se…</div>
+      <p style="font-size:13px;line-height:1.6;color:var(--text-soft)">Volete la meta più originale e gastronomicamente ricca del viaggio. I pintxos e il Guggenheim sono esperienze uniche. Mettete in conto le due tratte più impegnative (Nîmes→SS e SS→Marsiglia) e il budget trasporti più alto.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════ FOOTER -->
+<footer>
+  <p>🚐 <strong>Viaggio Agosto 2025</strong> — Reggio Emilia → Mediterraneo e ritorno</p>
+  <p style="margin-top:6px">A: 2.380 km · B: 1.950 km · C: 2.620 km · D: 2.520 km · 7 notti · 6 persone</p>
+  <p style="margin-top:10px;font-size:11px">⚠️ Tutte le stime di costo sono indicative. Verifica pedaggi aggiornati su <a href="https://www.viamichelin.it" target="_blank" style="color:var(--gold)">ViaMichelin</a> e <a href="https://www.autopistas.com" target="_blank" style="color:var(--gold)">Autopistas.es</a> prima della partenza.</p>
+</footer>
+
+<script>
+// ════════ DATA ════════
+const days = {
+  a: [
+    { n:1, date:"4 ago", emoji:"🚐", city:"Reggio Emilia → Nizza", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"350 km · ~4h guida · ⛽ ~€46 · 🛣️ ~€38",
+      morning:"Partenza da Reggio Emilia ore 8:30 via A26 → A10 → A8. Sosta caffè a Savona (~1h30). Paesaggio Riviera di Ponente.",
+      afternoon:"Arrivo a Nizza ~13:00. Check-in Airbnb zona Cimiez o Jean Médecin. Pranzo al Cours Saleya (mercato).",
+      evening:"Passeggiata in Place Masséna, Promenade des Anglais al tramonto. Cena: Lou Nissart €€ (cucina nizzarda, socca e pissaladière).",
+      tips:"Parcheggio: Parking Saleya o Parking Ferber ~€18/g. ZTL centro: vieille ville chiusa ai veicoli la sera.",
+      airbnb:"Zona Jean Médecin / Liberation: centrale, bus e tram, accesso pulmino."
+    },
+    { n:2, date:"5 ago", emoji:"🏛️", city:"Nizza", badge:"badge-culture", badgeTxt:"🏛️ Cultura + Mare",
+      meta:"Tappa fissa",
+      morning:"Visita Vieux Nice: mercato del mattino al Cours Saleya, Cathédrale Sainte-Réparate, colline della Colline du Château (vista panoramica).",
+      afternoon:"Spiaggia pubblica a Villefranche-sur-Mer (~10 km) — più bella e meno affollata di Nizza città. Pulmino: parcheggio a Villefranche bassa.",
+      evening:"Aperitivo nel quartiere Le Port, cena a Acchiardo €€ (trattoria storica, niente turisti). Passeggiata serale in Vieux Nice.",
+      tips:"Colline du Château: ascensore gratuito o scale. Villefranche: parcheggio Parking Wilson ~€10/g.",
+      airbnb:"Stessa soluzione notte precedente."
+    },
+    { n:3, date:"6 ago", emoji:"🚐", city:"Nizza → Nîmes", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"260 km · ~3h guida · ⛽ ~€34 · 🛣️ ~€22",
+      morning:"Partenza ore 9:00 via A8 → A9. Sosta facoltativa ad Arles (~2h30 da Nizza): anfiteatro romano, 30 min di passeggiata.",
+      afternoon:"Arrivo Nîmes ~13:00-14:00. Check-in. Pomeriggio: visita agli Arènes de Nîmes (uno degli anfiteatri romani meglio conservati al mondo) e Maison Carrée.",
+      evening:"Cena: Le Lisita €€€ (vicino alle Arène), oppure Skab €€ (cucina moderna francese). Passeggiata serale nei Jardins de la Fontaine.",
+      tips:"Parcheggio: Parking Arènes ~€12/g. Centro Nîmes accessibile a piedi dall'area parcheggi perimetrale.",
+      airbnb:"Zona centro storico vicino alle Arènes."
+    },
+    { n:4, date:"7 ago", emoji:"🚐", city:"Nîmes → Barcellona", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"290 km · ~3,5h guida · ⛽ ~€37 · 🛣️ ~€30",
+      morning:"Partenza ore 8:30 via A9 → AP-7. Sosta facoltativa a Perpignan (~1h45): caffè rapido, 15 min. Confine Francia-Spagna.",
+      afternoon:"Arrivo Barcellona ~12:30-13:00. Check-in Airbnb zona Eixample o Gràcia. Pranzo leggero nel quartiere.",
+      evening:"Sera tranquilla di ambientamento: passeggiata serale a Barceloneta, aperitivo sul mare. Cena Bar del Pla (El Born) €€.",
+      tips:"Parcheggio: Parking Glòries ~€20/g oppure Parking Espanya ~€22/g. Lascia il pulmino per tutta la permanenza.",
+      airbnb:"Zona Eixample Esquerra: centrale, servita da metro, accesso pulmino via Carrer de Muntaner."
+    },
+    { n:5, date:"8 ago", emoji:"🏛️", city:"Barcellona — Giorno 2", badge:"badge-culture", badgeTxt:"🏛️ Cultura",
+      meta:"Giornata piena",
+      morning:"Sagrada Família (prenotare online!): 2-3 ore. A piedi verso Passeig de Gràcia: Casa Batlló e Casa Milà (La Pedrera) — esterno gratuito.",
+      afternoon:"Pausa pranzo zona Eixample. Pomeriggio: Parc Güell (biglietto zona monumentale — verifica sito ufficiale) o spiaggia Barceloneta.",
+      evening:"Aperitivo al Poblenou, cena a Bodega Sepúlveda €€ (autentica, menu del giorno ~€14). Serata nel Born: cocktail bar Sor Rita €€.",
+      tips:"Sagrada Família: prenota con 3+ giorni anticipo in agosto. Parc Güell: accesso al parco libero, zona monumentale a pagamento.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:6, date:"9 ago", emoji:"🏖️", city:"Barcellona — Giorno 3", badge:"badge-relax", badgeTxt:"🏖️ Relax + Gràcia",
+      meta:"Mattina libera + partenza pomeriggio",
+      morning:"Mattina libera: mercato di Gràcia (Mercat de l'Abaceria), passeggiata nel quartiere Gràcia. Aperitivo in Plaza del Sol.",
+      afternoon:"Pranzo nel Born. Partenza verso Marsiglia ore 14:30-15:00 via AP-7 → A9 (~4h, arrivo ~19:00).",
+      evening:"Arrivo Marsiglia ~19:00. Check-in. Cena leggera vicino al Vieux-Port: Les Arcenaulx €€€ o Le Rhul €€ (bouillabaisse).",
+      tips:"Il tratto Barcellona-Marsiglia è il più lungo (~4h): partenza entro le 15:00 per non arrivare tardi.",
+      airbnb:"Zona Vieux-Port o Le Panier per Marsiglia."
+    },
+    { n:7, date:"10 ago", emoji:"🏙️", city:"Marsiglia", badge:"badge-culture", badgeTxt:"🏛️ Marsiglia",
+      meta:"Tappa fissa",
+      morning:"Vieux-Port e MuCEM (Museo delle Civiltà — a pagamento, verifica sito). Quartiere Le Panier a piedi.",
+      afternoon:"Calanques: gita in barca (a pagamento — prenota il giorno prima) o camminata verso Calanque de Sugiton (~2h a/r).",
+      evening:"Ultima cena: bouillabaisse autentica da Chez Fonfon €€€ (storico, prenota) oppure Le Malthazar €€. Passeggiata finale al Vieux-Port.",
+      tips:"Parcheggio: Parking Vieux-Port ~€20/g. Calanques in agosto: accesso regolamentato, verifica restrizioni incendi su prefettura13.fr.",
+      airbnb:"Zona Vieux-Port / Notre-Dame-du-Mont."
+    },
+    { n:8, date:"11 ago", emoji:"🏠", city:"Marsiglia → Reggio Emilia", badge:"badge-transfer", badgeTxt:"🚐 Rientro",
+      meta:"640 km · ~6,5h guida · ⛽ ~€84 · 🛣️ ~€58",
+      morning:"Partenza ENTRO le 8:00-8:30 da Marsiglia via A7 → A8 → A10 → A26 → A1. Sosta pranzo a Genova (~3h30) o area di servizio.",
+      afternoon:"Arrivo a Reggio Emilia entro le 15:30-16:30 (con traffico agosto stimato). Ben dentro il vincolo delle 19:30.",
+      evening:"—",
+      tips:"Partenza max ore 9:00 per avere margine con traffico. Non partire dopo le 9:30.",
+      airbnb:"—"
+    }
+  ],
+  b: [
+    { n:1, date:"4 ago", emoji:"🚐", city:"Reggio Emilia → Nizza", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"350 km · ~4h guida · ⛽ ~€46 · 🛣️ ~€38",
+      morning:"Partenza ore 8:30 via A26 → A10 → A8. Sosta a Savona ~1h30.",
+      afternoon:"Arrivo Nizza ~13:00. Check-in. Pranzo al Cours Saleya.",
+      evening:"Promenade des Anglais al tramonto. Cena: Cave Romagnan €€ (cucina nizzarda autentica).",
+      tips:"Parking Saleya ~€18/g. ZTL Vieux Nice serale.",
+      airbnb:"Zona Jean Médecin o Liberation."
+    },
+    { n:2, date:"5 ago", emoji:"🏛️", city:"Nizza", badge:"badge-culture", badgeTxt:"🏛️ Cultura + Mare",
+      meta:"Tappa fissa",
+      morning:"Vieux Nice: mercato, Cathédrale, Colline du Château (vista mozzafiato).",
+      afternoon:"Spiaggia a Villefranche-sur-Mer (~10 km, pulmino: Parking Wilson ~€10/g).",
+      evening:"Aperitivo nel Porto, cena da Acchiardo €€.",
+      tips:"Villefranche è più bella di Nizza per il mare.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:3, date:"6 ago", emoji:"🚐", city:"Nizza → Nîmes", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"260 km · ~3h · ⛽ ~€34 · 🛣️ ~€22",
+      morning:"Partenza 9:00 via A8 → A9. Sosta facoltativa ad Arles (anfiteatro).",
+      afternoon:"Arrivo Nîmes ~13:00. Arènes, Maison Carrée.",
+      evening:"Cena: Skab €€. Jardins de la Fontaine.",
+      tips:"Parking Arènes ~€12/g.",
+      airbnb:"Centro storico vicino alle Arènes."
+    },
+    { n:4, date:"7 ago", emoji:"🚐", city:"Nîmes → Sète", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento breve",
+      meta:"55 km · ~45 min · ⛽ ~€7 · 🛣️ ~€4",
+      morning:"Partenza rilassata ore 10:00. Arrivo Sète ~11:00. Check-in. Prima esplorazione del porto peschereccio e del Canal Royal.",
+      afternoon:"Pranzo al Quai Maximin Licciardi: moules-frites o pesce del giorno €€. Pomeriggio: spiaggia della Corniche (Plage de la Corniche — sabbia fine, meno affollata).",
+      evening:"Serata al Porto: aperitivo al tramonto, cena a La Pointe Courte €€ — tielle sétoise e pesce fresco. Passeggiata serale sul lungocanale.",
+      tips:"Parking Pointe Courte ~€8/g o Parking Théâtre ~€10/g. Sète è piccola: muoversi a piedi è la soluzione migliore.",
+      airbnb:"Zona centro vicino al Canal Royal o sulla Corniche."
+    },
+    { n:5, date:"8 ago", emoji:"🦩", city:"Sète — Giorno 2 Camargue", badge:"badge-relax", badgeTxt:"🦩 Camargue",
+      meta:"Escursione ~60 km A/R",
+      morning:"Partenza con pulmino verso la Camargue ore 9:00. Parc Ornithologique de Pont de Gau: fenicotteri rosa garantiti (a pagamento, verifica sito). ~1h30.",
+      afternoon:"Saintes-Maries-de-la-Mer: villaggio provenzale, spiagge selvagge, cavalli bianchi Camargue liberi sulla spiaggia. Pranzo al sacco o trattoria locale €. Visita Aigues-Mortes (città murata medievale, ~30 min).",
+      evening:"Rientro a Sète ~18:30. Aperitivo sul tetto o in terrazza. Cena: Marché des Halles — comprare prodotti freschi e cucinare in Airbnb (esperienza autentica e risparmio).",
+      tips:"Porta repellente zanzare per la Camargue. Accesso Pont de Gau: verifica orari su pontdegau.com. Aigues-Mortes: parcheggio fuori dalle mura.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:6, date:"9 ago", emoji:"🏖️", city:"Sète — Giorno 3 Mare", badge:"badge-relax", badgeTxt:"🏖️ Relax",
+      meta:"Giornata libera",
+      morning:"Mattina spiaggia: Plage des Mouettes o Plage de la Corniche. Più tranquilla di una spiaggia spagnola in agosto. Snorkeling possibile nelle acque chiare.",
+      afternoon:"Pomeriggio: visita al cimitero marino di Paul Valéry (panoramico, gratuito) e museo Brassens (a pagamento — verifica sito). Passeggiata sul Mont Saint-Clair per vista su mare e stagno di Thau.",
+      evening:"Ultima cena a Sète: Brasucade di cozze (braciolata di cozze tipica) su terrazze sul porto. Serata in un bar-jazz del lungocanale.",
+      tips:"Mont Saint-Clair: pulmino può salire, parcheggio in cima, vista a 360°.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:7, date:"10 ago", emoji:"🚐", city:"Sète → Marsiglia", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"175 km · ~2h · ⛽ ~€23 · 🛣️ ~€15",
+      morning:"Partenza ore 10:00 via A9 → A54 → A7. Arrivo Marsiglia ~12:30. Check-in.",
+      afternoon:"Vieux-Port, Le Panier, MuCEM esterno. Calanque de Sormiou in barca (prenota il giorno prima).",
+      evening:"Cena: bouillabaisse da Chez Michel €€€ (storica) o Le Malthazar €€. Aperitivo finale sul Vieux-Port.",
+      tips:"Parking Vieux-Port ~€20/g. Calanques: verifica restrizioni accesso agosto.",
+      airbnb:"Zona Vieux-Port."
+    },
+    { n:8, date:"11 ago", emoji:"🏠", city:"Marsiglia → Reggio Emilia", badge:"badge-transfer", badgeTxt:"🚐 Rientro",
+      meta:"640 km · ~6,5h · ⛽ ~€84 · 🛣️ ~€58",
+      morning:"Partenza entro ore 8:30 via A7 → A8 → A26 → A1. Sosta a Genova ~3h30.",
+      afternoon:"Arrivo Reggio Emilia ~15:00-16:00. Ben dentro le 19:30.",
+      evening:"—",
+      tips:"Non partire dopo le 9:00 per avere margine.",
+      airbnb:"—"
+    }
+  ],
+  c: [
+    { n:1, date:"4 ago", emoji:"🚐", city:"Reggio Emilia → Nizza", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"350 km · ~4h · ⛽ ~€46 · 🛣️ ~€38",
+      morning:"Partenza ore 8:30 via A26 → A10 → A8. Sosta Savona ~1h30.",
+      afternoon:"Arrivo Nizza ~13:00. Check-in. Pranzo al Cours Saleya.",
+      evening:"Promenade des Anglais. Cena: Lou Nissart €€.",
+      tips:"Parking Saleya ~€18/g.",
+      airbnb:"Zona Jean Médecin o Liberation."
+    },
+    { n:2, date:"5 ago", emoji:"🏛️", city:"Nizza", badge:"badge-culture", badgeTxt:"🏛️ Cultura + Mare",
+      meta:"Tappa fissa",
+      morning:"Vieux Nice: mercato, Cathédrale, Colline du Château.",
+      afternoon:"Spiaggia Villefranche-sur-Mer.",
+      evening:"Aperitivo Porto, cena Acchiardo €€.",
+      tips:"Colline du Château: ascensore gratuito.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:3, date:"6 ago", emoji:"🚐", city:"Nizza → Nîmes", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"260 km · ~3h · ⛽ ~€34 · 🛣️ ~€22",
+      morning:"Partenza 9:00 via A8 → A9. Sosta facoltativa Arles.",
+      afternoon:"Arrivo Nîmes ~13:00. Arènes e Maison Carrée.",
+      evening:"Cena: Le Lisita €€€. Jardins de la Fontaine.",
+      tips:"Parking Arènes ~€12/g.",
+      airbnb:"Centro storico."
+    },
+    { n:4, date:"7 ago", emoji:"⚠️", city:"Nîmes → Valencia (sosta Perpignan)", badge:"badge-warning", badgeTxt:"⚠️ Tratta Lunga",
+      meta:"550 km · ~5h con sosta · ⛽ ~€70 · 🛣️ ~€55",
+      morning:"⚠️ PARTENZA ORE 8:00 MAX da Nîmes via A9. Arrivo Perpignan ~10:15. SOSTA PRANZO ~45 min (consigliata: Place de la Loge, centro storico compatto). Ripartenza ~11:00.",
+      afternoon:"Confine Francia-Spagna ~11:30 (AP-7). Sosta benzina lato spagnolo (1,55€/L). Arrivo Valencia ~14:30-15:00. Check-in Airbnb zona Ruzafa o Malvarrosa. Pomeriggio leggero: passeggiata nel quartiere, prima colazione valenciana (horchata con fartons).",
+      evening:"Cena tranquilla: Bar Restaurante Navarro (Ruzafa) €€ — paella valenciana autentica in un posto di quartiere, nessun turista.",
+      tips:"PARTENZA ORE 8:00 TASSATIVA. Sosta Perpignan: Parking Place Catalogne ~€3/h. AP-7 pedaggio Spagna: ~€35-45 stima — verifica Autopistas.es.",
+      airbnb:"Zona Ruzafa: vivace, autentica, metro. Alternativa: Malvarrosa (vicino spiaggia)."
+    },
+    { n:5, date:"8 ago", emoji:"🏛️", city:"Valencia — Giorno 2", badge:"badge-culture", badgeTxt:"🏛️ Cultura",
+      meta:"Giornata piena",
+      morning:"Ciudad de las Artes y las Ciencias: Hemisfèric, Palau de les Arts, Pont de l'Assut de l'Or — capolavoro di Calatrava, visita esterna gratuita ~2h. Entrata all'Oceanogràfic (a pagamento — verifica prezzi sito ufficiale).",
+      afternoon:"Mercado Central (uno dei più belli d'Europa, chiude ~15:00). Quartiere El Carmen a piedi: murales, bar, atmosfera medievale. Catedral di Valencia e visita alla Seu (prezzo ingresso — verifica).",
+      evening:"Vita notturna nel Barrio del Carmen: aperitivo nei bar all'aperto, poi cocktail in uno dei locali storici dalle 23:00. Atmosfera valenciana autentica.",
+      tips:"Parcheggio: Parking Colón ~€20/g. El Carmen: ZTL serale, vai a piedi dal parcheggio (~15 min).",
+      airbnb:"Stessa soluzione."
+    },
+    { n:6, date:"9 ago", emoji:"🏖️", city:"Valencia — Giorno 3", badge:"badge-relax", badgeTxt:"🏖️ Mare + Albufera",
+      meta:"Mattina mare + pomeriggio Albufera",
+      morning:"Playa de la Malvarrosa (pulmino: via Malvarrosa, parcheggio laterale gratuito o ~€5). Mattinata al mare, bagno, chiringuito per la colazione.",
+      afternoon:"Ore 14:00: spostamento verso El Saler e Parco Naturale dell'Albufera (~12 km a sud). Giro in barca sul lago al tramonto (a pagamento, prenota — verifica operatori locali). Riso nelle risaie — il paesaggio da cui nasce la paella.",
+      evening:"Cena di addio a Valencia: La Pepica (Passeig Neptú) €€€ — storica, frequentata dai locali, paella valenciana originale. Prenota con almeno 2 giorni anticipo.",
+      tips:"La Pepica: prenotazione consigliata in agosto. Albufera: accesso con pulmino senza problemi.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:7, date:"10 ago", emoji:"🚐", city:"Valencia → Marsiglia", badge:"badge-warning", badgeTxt:"🚐 Tratta Lunga",
+      meta:"650 km · ~6h guida · ⛽ ~€83 · 🛣️ ~€65",
+      morning:"PARTENZA ORE 7:30 da Valencia via AP-7 → A9 → A7. Sosta benzina in Spagna prima del confine (1,55€/L). Sosta pranzo a Montpellier ~12:00 (~1h).",
+      afternoon:"Arrivo Marsiglia ~15:00-16:00. Check-in. Vieux-Port e Le Panier.",
+      evening:"Cena: Chez Fonfon €€€ o Le Malthazar €€ (bouillabaisse). Ultima serata sul Vieux-Port.",
+      tips:"Valencia-Marsiglia è la tratta più lunga del viaggio (~6h). Partenza 7:30 obbligatoria. NON partire dopo le 8:00.",
+      airbnb:"Zona Vieux-Port."
+    },
+    { n:8, date:"11 ago", emoji:"🏠", city:"Marsiglia → Reggio Emilia", badge:"badge-transfer", badgeTxt:"🚐 Rientro",
+      meta:"640 km · ~6,5h · ⛽ ~€84 · 🛣️ ~€58",
+      morning:"Partenza ore 8:30 max via A7 → A8 → A26 → A1. Sosta Genova ~3h30.",
+      afternoon:"Arrivo Reggio Emilia ~15:30-16:00.",
+      evening:"—",
+      tips:"Non partire dopo le 9:00.",
+      airbnb:"—"
+    }
+  ]
+,
+  d: [
+    { n:1, date:"4 ago", emoji:"🚐", city:"Reggio Emilia → Nizza", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"350 km · ~4h · ⛽ ~€46 · 🛣️ ~€38",
+      morning:"Partenza ore 8:30 via A26 → A10 → A8. Sosta caffè a Savona ~1h30.",
+      afternoon:"Arrivo Nizza ~13:00. Check-in. Pranzo al Cours Saleya.",
+      evening:"Promenade des Anglais. Cena: Lou Nissart €€ (cucina nizzarda, socca e pissaladière).",
+      tips:"Parking Saleya ~€18/g. ZTL Vieux Nice serale.",
+      airbnb:"Zona Jean Médecin o Liberation."
+    },
+    { n:2, date:"5 ago", emoji:"🏛️", city:"Nizza", badge:"badge-culture", badgeTxt:"🏛️ Cultura + Mare",
+      meta:"Tappa fissa",
+      morning:"Vieux Nice: mercato Cours Saleya, Cathédrale Sainte-Réparate, Colline du Château.",
+      afternoon:"Spiaggia a Villefranche-sur-Mer (~10 km). Parking Wilson ~€10/g.",
+      evening:"Aperitivo nel Porto, cena da Acchiardo €€.",
+      tips:"Colline du Château: ascensore gratuito.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:3, date:"6 ago", emoji:"🚐", city:"Nizza → Nîmes", badge:"badge-transfer", badgeTxt:"🚐 Trasferimento",
+      meta:"260 km · ~3h · ⛽ ~€34 · 🛣️ ~€22",
+      morning:"Partenza 9:00 via A8 → A9. Sosta facoltativa Arles (anfiteatro romano).",
+      afternoon:"Arrivo Nîmes ~13:00. Arènes de Nîmes e Maison Carrée.",
+      evening:"Cena: Skab €€ (cucina moderna francese). Jardins de la Fontaine.",
+      tips:"Parking Arènes ~€12/g.",
+      airbnb:"Centro storico vicino alle Arènes."
+    },
+    { n:4, date:"7 ago", emoji:"⚠️", city:"Nîmes → San Sebastián (via A9 → A63 → Irun)", badge:"badge-warning", badgeTxt:"⚠️ Tratta Lunga",
+      meta:"680 km · ~6h30 · ⛽ ~€87 · 🛣️ ~€62",
+      morning:"⚠️ PARTENZA ORE 7:30 da Nîmes via A9 → A61 → A63 (autostrada dei Pirenei). Percorso lungo la costa atlantica francese fino a Irun/confine basco, poi AP-8 verso San Sebastián. Sosta caffè veloce in area di servizio ~10:00 (nessuna tappa culturale — si punta dritti alla meta).",
+      afternoon:"Confine verso i Paesi Baschi ~14:30. Arrivo San Sebastián ~16:30. Check-in Airbnb zona Gros. Primo giro della Parte Vieja, acquisto di txakoli e pintxos veloci.",
+      evening:"Prima serata tranquilla — il gruppo è stanco. Pintxos leggeri in Parte Vieja: Bar Txepetxa €€ (acciughe) + passeggiata sulla Concha al tramonto.",
+      tips:"PARTENZA 7:30 TASSATIVA. Percorso: A9 → A61 (Narbonne-Perpignan) → A63 (Bayonne) → AP-8 (Irun → SS). Pedaggi Francia A63 + Spagna AP-8: stima ~€62 totale. Alcuni tratti AP-8 basca a pedaggio variabile — verifica Autopistas.es.",
+      airbnb:"Zona Gros: più economica, giovane, spiaggia Zurriola a piedi. Alternativa: Parte Vieja (rumorosa di notte)."
+    },
+    { n:5, date:"8 ago", emoji:"🎨", city:"San Sebastián → Bilbao (gita) → San Sebastián", badge:"badge-culture", badgeTxt:"🎨 Bilbao in giornata",
+      meta:"~100 km A/R · ~2h guida totale · ⛽ ~€13 · 🛣️ ~€8",
+      morning:"Partenza verso Bilbao ore 9:00 via AP-8 (~1h). Arrivo ~10:00. Guggenheim Bilbao: 2-3 ore (prenota online — a pagamento, verifica prezzi sito ufficiale). La struttura di Gehry è spettacolare anche solo dall'esterno.",
+      afternoon:"Pranzo in Casco Viejo de Bilbao: pintxos anche qui, prezzi leggermente più bassi di SS. Las Siete Calles a piedi. Rientro a San Sebastián ~16:30.",
+      evening:"Serata nella Parte Vieja: il classico giro dei pintxos e txakoli. Bar Nestor (€€) per la tortilla leggendaria — arriva mezz'ora prima dell'orario di apertura. Poi giro libero di bar.",
+      tips:"Bilbao parcheggio: Parking Abandoibarra o Guggenheim ~€2-3/h. Evita il pulmino nel Casco Viejo (strade strette). Rientro a SS via autostrada AP-8.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:6, date:"9 ago", emoji:"🏖️", city:"San Sebastián — Giorno 3", badge:"badge-relax", badgeTxt:"🏖️ Mare + Città",
+      meta:"Giornata libera",
+      morning:"Mattina alla Playa de La Concha: la spiaggia più bella del nord Spagna. Sabbia fine, baia protetta, panorama sul Monte Urgull. Noleggio kayak o pedalò (operatori in spiaggia).",
+      afternoon:"Salita al Monte Igueldo (funicolare a pagamento — verifica sito) per il panorama su tutta la baia. Oppure visita al Acquario di San Sebastián (a pagamento). Ultime shopping di txistorra e conserve nel Mercado de la Bretxa.",
+      evening:"Cena di addio a SS: ristorante Kokotxa €€€ (cucina basca moderna, Parte Vieja) o un ultimo giro di pintxos nei bar storici. Sidra o txakoli.",
+      tips:"La Concha: parcheggio Urgull ~€15/g o Parking Gros ~€14/g. Monte Igueldo: funicolare + parcheggio dedicato.",
+      airbnb:"Stessa soluzione."
+    },
+    { n:7, date:"10 ago", emoji:"🚐", city:"San Sebastián → Marsiglia", badge:"badge-warning", badgeTxt:"🚐 Tratta Lunga",
+      meta:"700 km · ~6h30 guida · ⛽ ~€91 · 🛣️ ~€65",
+      morning:"PARTENZA ORE 7:30 da San Sebastián via AP-8 → A63 → A9 → A7. Sosta pranzo a Montpellier o Narbonne ~12:30 (~1h). Ripartenza ~13:30.",
+      afternoon:"Arrivo Marsiglia ~16:30-17:00. Check-in. Vieux-Port e passeggiata nel Panier.",
+      evening:"Cena: Le Malthazar €€ (bouillabaisse moderna) o Chez Michel €€€ (classica). Ultima serata sul Vieux-Port.",
+      tips:"Partenza 7:30 OBBLIGATORIA. SS→Marsiglia è la tratta di rientro più lunga del viaggio. Non partire dopo le 8:00.",
+      airbnb:"Zona Vieux-Port o Notre-Dame-du-Mont."
+    },
+    { n:8, date:"11 ago", emoji:"🏠", city:"Marsiglia → Reggio Emilia", badge:"badge-transfer", badgeTxt:"🚐 Rientro",
+      meta:"640 km · ~6h30 · ⛽ ~€84 · 🛣️ ~€58",
+      morning:"Partenza ore 8:30 via A7 → A8 → A26 → A1. Sosta a Genova ~3h30.",
+      afternoon:"Arrivo Reggio Emilia ~15:30-16:00.",
+      evening:"—",
+      tips:"Non partire dopo le 9:00 per avere margine sulle 19:30.",
+      airbnb:"—"
+    }
+  ]
+};
+
+// ════════ BUILD TIMELINES ════════
+function buildTimeline(version) {
+  const container = document.getElementById('timeline-' + version);
+  const dotClass = 'dot-' + version;
+  const subActive = 'active-' + version;
+  days[version].forEach((d, i) => {
+    const card = document.createElement('div');
+    card.className = 'day-card';
+    card.innerHTML = `
+      <div class="day-dot ${dotClass}">${d.n}</div>
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-emoji">${d.emoji}</span>
+        <div>
+          <div class="day-date">${d.date}</div>
+          <div class="day-city">${d.city}</div>
+          ${d.meta ? `<div class="day-meta">${d.meta}</div>` : ''}
+        </div>
+        <span class="day-badge ${d.badge}">${d.badgeTxt}</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="day-body">
+        <div class="day-grid">
+          ${d.morning !== '—' ? `<div class="day-slot"><div class="slot-label">🌅 Mattina</div><p>${d.morning}</p></div>` : ''}
+          ${d.afternoon !== '—' ? `<div class="day-slot"><div class="slot-label">☀️ Pomeriggio</div><p>${d.afternoon}</p></div>` : ''}
+          ${d.evening !== '—' ? `<div class="day-slot"><div class="slot-label">🌙 Sera</div><p>${d.evening}</p></div>` : ''}
+          ${d.tips ? `<div class="day-slot"><div class="slot-label">💡 Tips</div><p>${d.tips}</p></div>` : ''}
+          ${d.airbnb && d.airbnb !== '—' ? `<div class="day-slot"><div class="slot-label">🏠 Airbnb</div><p>${d.airbnb}</p></div>` : ''}
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+// ════════ MAPS — Google Maps Embed (no API key) + full route link ════════
+// ════════ MAPPE — Leaflet + OSM tiles + OSRM routing stradale reale ════════
+
+const mapData = {
+  a: {
+    color: '#1a6b9a',
+    gmaps: 'https://www.google.com/maps/dir/Reggio+Emilia,+Italy/Nice,+France/N%C3%AEmes,+France/Barcelona,+Spain/Marseille,+France',
+    stops: [
+      { lat:44.6988, lng:10.6307, name:'Reggio Emilia', info:'Partenza · 4 ago' },
+      { lat:43.7102, lng:7.2620,  name:'Nizza',         info:'2 notti · 4-5 ago · 350 km' },
+      { lat:43.8367, lng:4.3601,  name:'Nimes',         info:'1 notte · 6 ago · 260 km' },
+      { lat:41.3851, lng:2.1734,  name:'Barcellona',    info:'3 notti · 7-9 ago · 290 km' },
+      { lat:43.2965, lng:5.3698,  name:'Marsiglia',     info:'1 notte · 10 ago · 480 km' }
+    ]
+  },
+  b: {
+    color: '#2d7a4f',
+    gmaps: 'https://www.google.com/maps/dir/Reggio+Emilia,+Italy/Nice,+France/N%C3%AEmes,+France/S%C3%A8te,+France/Marseille,+France',
+    stops: [
+      { lat:44.6988, lng:10.6307, name:'Reggio Emilia', info:'Partenza · 4 ago' },
+      { lat:43.7102, lng:7.2620,  name:'Nizza',         info:'2 notti · 4-5 ago · 350 km' },
+      { lat:43.8367, lng:4.3601,  name:'Nimes',         info:'1 notte · 6 ago · 260 km' },
+      { lat:43.4028, lng:3.6966,  name:'Sete',          info:'3 notti · 7-9 ago · 55 km' },
+      { lat:43.2965, lng:5.3698,  name:'Marsiglia',     info:'1 notte · 10 ago · 175 km' }
+    ]
+  },
+  c: {
+    color: '#e8682a',
+    gmaps: 'https://www.google.com/maps/dir/Reggio+Emilia,+Italy/Nice,+France/N%C3%AEmes,+France/Perpignan,+France/Valencia,+Spain/Marseille,+France',
+    stops: [
+      { lat:44.6988, lng:10.6307, name:'Reggio Emilia',      info:'Partenza · 4 ago' },
+      { lat:43.7102, lng:7.2620,  name:'Nizza',              info:'2 notti · 4-5 ago · 350 km' },
+      { lat:43.8367, lng:4.3601,  name:'Nimes',              info:'1 notte · 6 ago · 260 km' },
+      { lat:42.6976, lng:2.8954,  name:'Sosta Perpignan',    info:'Sosta pranzo 45 min · 7 ago', warn:true },
+      { lat:39.4699, lng:-0.3763, name:'Valencia',           info:'3 notti · 7-9 ago · 550 km' },
+      { lat:43.2965, lng:5.3698,  name:'Marsiglia',          info:'1 notte · 10 ago · 650 km' }
+    ]
+  }
+};
+
+mapData['d'] = {
+  color: '#7b3fa0',
+  gmaps: 'https://www.google.com/maps/dir/Reggio+Emilia,+Italy/Nice,+France/N%C3%AEmes,+France/San+Sebastian,+Spain/Marseille,+France',
+  stops: [
+    { lat:44.6988, lng:10.6307, name:'Reggio Emilia',    info:'Partenza · 4 ago' },
+    { lat:43.7102, lng:7.2620,  name:'Nizza',            info:'2 notti · 4-5 ago · 350 km' },
+    { lat:43.8367, lng:4.3601,  name:'Nimes',            info:'1 notte · 6 ago · 260 km' },
+    { lat:43.3183, lng:-1.9812, name:'San Sebastian',    info:'3 notti · 7-9 ago · 680 km' },
+    { lat:43.2630, lng:-2.9350, name:'Bilbao (gita)',    info:'Gita in giornata · 8 ago', warn:true },
+    { lat:43.2965, lng:5.3698,  name:'Marsiglia',        info:'1 notte · 10 ago · 700 km' }
+  ]
+};
+
+
+const mapInited = {};
+const mapObjects = {};
+
+function makeMarkerIcon(label, color, warn) {
+  const sz = warn ? 34 : 30;
+  return L.divIcon({
+    className: '',
+    html: '<div style="background:' + color + ';color:#fff;width:' + sz + 'px;height:' + sz + 'px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:' + (warn?10:13) + 'px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-family:Poppins,sans-serif;">' + label + '</div>',
+    iconSize: [sz, sz],
+    iconAnchor: [sz/2, sz/2],
+    popupAnchor: [0, -(sz/2+4)]
+  });
+}
+
+async function fetchOSRMRoute(stops) {
+  const coords = stops.map(function(s){ return s.lng + ',' + s.lat; }).join(';');
+  const url = 'https://router.project-osrm.org/route/v1/driving/' + coords + '?overview=full&geometries=geojson';
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.code === 'Ok') {
+      return data.routes[0].geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function initMap(version) {
+  if (mapInited[version]) {
+    if (mapObjects[version]) setTimeout(function(){ mapObjects[version].invalidateSize(); }, 100);
+    return;
+  }
+  mapInited[version] = true;
+
+  const cfg = mapData[version];
+  const mapEl = document.getElementById('map-' + version);
+  mapEl.style.height = '400px';
+
+  // Add footer with GMaps link after the map container
+  const wrapper = mapEl.parentElement;
+  if (!wrapper.querySelector('.map-footer')) {
+    const footer = document.createElement('div');
+    footer.className = 'map-footer';
+    footer.innerHTML =
+      '<span style="font-size:12px;color:#888;">Percorso stradale OSRM · OpenStreetMap</span>' +
+      '<a href="' + cfg.gmaps + '" target="_blank" style="font-size:13px;font-weight:600;color:' + cfg.color + ';text-decoration:none;padding:5px 14px;border:2px solid ' + cfg.color + ';border-radius:20px;">Apri in Google Maps →</a>';
+    wrapper.appendChild(footer);
+  }
+
+  // Init Leaflet map
+  const map = L.map(mapEl, { zoomControl: true });
+  mapObjects[version] = map;
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors | Routing: OSRM',
+    maxZoom: 18
+  }).addTo(map);
+
+  // Place markers
+  const bounds = [];
+  cfg.stops.forEach(function(s, i) {
+    const warn = !!s.warn;
+    const markerColor = warn ? '#e6a817' : cfg.color;
+    const label = warn ? '!' : String(i + 1);
+    const icon = makeMarkerIcon(label, markerColor, warn);
+    L.marker([s.lat, s.lng], { icon })
+      .addTo(map)
+      .bindPopup('<strong>' + s.name + '</strong><br><small style="color:#666">' + s.info + '</small>');
+    bounds.push([s.lat, s.lng]);
+  });
+
+  map.fitBounds(bounds, { padding: [40, 40] });
+  setTimeout(function(){ map.invalidateSize(); }, 300);
+
+  // Fetch real road route from OSRM
+  const routeCoords = await fetchOSRMRoute(cfg.stops);
+  if (routeCoords) {
+    L.polyline(routeCoords, { color: cfg.color, weight: 4, opacity: 0.85 }).addTo(map);
+  } else {
+    // fallback: dashed straight lines
+    L.polyline(bounds, { color: cfg.color, weight: 3, opacity: 0.55, dashArray: '8,6' }).addTo(map);
+  }
+}
+
+// ════════ TAB SWITCHING ════════
+function switchTab(tab) {
+  ['a','b','c','d','compare'].forEach(t => {
+    document.getElementById('section-' + t).classList.remove('active');
+    document.getElementById('nav-' + t).classList.remove('active');
+    const vc = document.getElementById('vc-' + t);
+    if (vc) vc.classList.remove('active-a','active-b','active-c','active-d');
+  });
+  document.getElementById('section-' + tab).classList.add('active');
+  const navEl = document.getElementById('nav-' + tab);
+  navEl.classList.add('active');
+  if (tab !== 'compare') {
+    const vc = document.getElementById('vc-' + tab);
+    if (vc) vc.classList.add('active-' + tab);
+  }
+  if (['a','b','c','d'].includes(tab)) {
+    initMap(tab);
+  }
+}
+
+// ════════ ACCORDION & DAY TOGGLE ════════
+function toggleDay(header) {
+  const body = header.nextElementSibling;
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+function toggleAcc(header) {
+  const body = header.nextElementSibling;
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+// ════════ INIT ════════
+window.addEventListener('load', () => {
+  buildTimeline('a');
+  buildTimeline('b');
+  buildTimeline('c');
+  buildTimeline('d');
+  initMap('a');
+});
+</script>
+</body>
+</html>
